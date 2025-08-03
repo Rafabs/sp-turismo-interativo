@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="imgs/logo.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SP | Turismo Interativo</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="map_style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+</head>
+
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="index.html"><img src="imgs/logo.png" class="logo" alt="Logo"></a>
+
+    <div class="lista_nomes">
+      <div class="nome_pt">Bem vindo a São Paulo!</div>
+      <div class="nome_en">Welcome to São Paulo!</div>
+    </div>
+
+    <div class="status-bar-container">
+      <div class="hora"></div>
+      <div class="dia"></div>
+      <div id="weather-icon"></div>
+      <div class="temperatura"> </div>
+    </div>
+  </nav>
+
+  <!-- Espaço para o mapa -->
+  <section class="map-container">
+    <div class="search-sidebar">
+      <div class="search-container">
+        <input type="text" placeholder="Pesquisar por um ponto turístico..." class="search-input">
+      </div>
+      <div class="search-results">
+        <!-- Os itens serão gerados dinamicamente via JavaScript -->
+      </div>
+    </div>
+    <div id="map" class="map"></div>
+  </section>
+
+  <!-- Leaflet core -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- MarkerCluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+</body>
+
+<script src="src/clima.js"></script>
+<script src="src/datetime.js"></script>
+<script type="module" src="src/map.js"></script>
+
+</html>
