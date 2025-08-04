@@ -4,6 +4,7 @@ body {
     padding: 0;
     background-color: #CACACA; 
     position: relative;
+    overflow: hidden; /* Remove scrollbar global */    
 }
 
 .logo {
@@ -30,11 +31,13 @@ body {
 
 .nome_pt {
     font-size: 90px;
+    white-space: nowrap;
     font-weight: bold;
 }
 
 .nome_en {
     font-size: 50px;
+    white-space: nowrap;
     font-style: italic;
 }
 
@@ -43,7 +46,7 @@ body {
     flex-direction: column;
     justify-content: right;
     text-align: right;
-    margin-left: 460px;
+    margin-left: 290px;
     color: white;
 }
 
@@ -64,7 +67,7 @@ body {
 #weather-icon {
     position: absolute;
     right: 120px;
-    bottom: 865px;
+    bottom: 785px;
 }
 
 #weather-icon img {
