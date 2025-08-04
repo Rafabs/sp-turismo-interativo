@@ -19,4 +19,4 @@ function getWeather() {
 }
 
 // Chama a função para obter o clima
-setInterval(getWeather, 1000);
+setInterval(getWeather, 600000);
