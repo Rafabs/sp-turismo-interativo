@@ -7,73 +7,87 @@ body {
     overflow: hidden; /* Remove scrollbar global */    
 }
 
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #C50000;
+    padding: 0px 10px;
+    flex-wrap: wrap; 
+    gap: 10px;
+}
+
 .logo {
     width: 150px;
     height: 150px;
     border-radius: 10px;
-    margin-top: 20px;
-    margin-bottom: auto;
-    margin-left: 20px;
-}
-
-.navbar {
-    display: flex;
-    background-color: #C50000; 
 }
 
 .lista_nomes {
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    margin-left: 20px; /* distância da lateral esquerda */
+    flex: 1;
+    min-width: 200px;
     color: white;
 }
 
 .nome_pt {
-    font-size: 90px;
+    font-size: clamp(30px, 5vw, 90px);
     white-space: nowrap;
     font-weight: bold;
+    margin: 0; 
 }
 
 .nome_en {
-    font-size: 50px;
+    font-size: clamp(20px, 3vw, 50px);
     white-space: nowrap;
     font-style: italic;
+    margin-top: -20px; 
 }
 
 .status-bar-container {
     display: flex;
     flex-direction: column;
-    justify-content: right;
+    align-items: flex-end;
+    color: white;
+    min-width: 200px;
     text-align: right;
-    margin-left: 290px;
-    color: white;
+    flex-shrink: 0;
+    gap: 4px; 
 }
 
-.hora{
-    font-size: 90px;
-}
-
-.dia{
-    font-size: 40px;
-}
-
-.temperatura{
-    font-size: 40px;
-    font-weight: bold;
-    color: white;
-}
-
-#weather-icon {
-    position: absolute;
-    right: 120px;
-    bottom: 785px;
+.weather-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: -15px;
 }
 
 #weather-icon img {
     width: 70px;
     height: 70px;
-    margin-bottom: 0px; 
+}
+
+.temperatura {
+    font-size: clamp(16px, 3vw, 40px);
+    font-weight: bold;
+    color: white;
+}
+
+.hora {
+    font-size: clamp(30px, 5vw, 90px);
+}
+
+.dia,
+.temperatura {
+    font-size: clamp(16px, 3vw, 40px);
+    font-weight: bold;
+}
+
+.hora,
+.dia,
+.temperatura {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
 }
 
 .map-container {
@@ -99,7 +113,7 @@ body {
 }
 
 .search-input {
-    width: 94%;
+    width: 95%;
     margin-top: 5px;
     padding: 10px;
     border: 1px solid #ddd;
@@ -109,7 +123,7 @@ body {
 
 .search-container {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 3px;
 }
 
 .search-input:focus {
