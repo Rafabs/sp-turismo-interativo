@@ -1,37 +1,41 @@
 import { landmarks } from './landmarks-data.js';
 
-// Configuração dos caminhos das imagens
+// Configurações
 const imagePaths = {
     markers: 'imgs/markers/',
     landmarks: 'imgs/landmarks/'
 };
 
-// Variável global para armazenar a instância do mapa
 let mapInstance = null;
 
-// Inicialização do mapa
+// Função principal
+function initializeApp() {
+    initMap();
+    createSidebarItems();
+    setupSearch();
+}
+
+// Mapa
 function initMap() {
     const container = document.getElementById('map');
     
-    // Verifica se o mapa já existe e remove antes de criar um novo
     if (mapInstance) {
         mapInstance.remove();
+        container.innerHTML = '';
     }
-    
-    // Limpa qualquer conteúdo pré-existente no container
-    container.innerHTML = '';
-    
-    // Cria nova instância do mapa
-    const saoPauloCoords = [-23.5505, -46.6333];
-    mapInstance = L.map('map').setView(saoPauloCoords, 12);
 
-    // Camada base do mapa
+    mapInstance = L.map('map').setView([-23.5505, -46.6333], 12);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 18,
     }).addTo(mapInstance);
 
-    // Adiciona marcadores ao mapa
+    addMarkersToMap();
+    return mapInstance;
+}
+
+function addMarkersToMap() {
     landmarks.forEach(landmark => {
         const marker = L.marker(landmark.coords, {
             icon: createCustomIcon(landmark.icon)
@@ -42,11 +46,63 @@ function initMap() {
             mapInstance.setView(this.getLatLng(), 15);
         });
     });
-    
-    return mapInstance;
 }
 
-// Cria ícones personalizados
+// Sidebar
+function createSidebarItems() {
+    const resultsContainer = document.querySelector('.search-results');
+    resultsContainer.innerHTML = '';
+    
+    landmarks.sort((a, b) => a.name.localeCompare(b.name))
+        .forEach(landmark => {
+            const item = document.createElement('div');
+            item.className = 'result-item';
+            item.innerHTML = `
+                <div class="result-marker">
+                    <img src="${imagePaths.markers}${landmark.icon}.png" 
+                         alt="${landmark.name}" class="sidebar-icon">
+                </div>
+                <div class="result-content">
+                    <div class="result-name">${landmark.name}</div>
+                    <div class="result-address">${landmark.address}</div>
+                </div>
+            `;
+
+            item.addEventListener('click', () => {
+                mapInstance.setView(landmark.coords, 16);
+                findMarkerByCoords(landmark.coords)?.openPopup();
+            });
+            
+            resultsContainer.appendChild(item);
+        });
+}
+
+// Utilitários
+function findMarkerByCoords(coords) {
+    let foundMarker = null;
+    mapInstance.eachLayer(layer => {
+        if (layer instanceof L.Marker && 
+            layer.getLatLng().lat === coords[0] && 
+            layer.getLatLng().lng === coords[1]) {
+            foundMarker = layer;
+        }
+    });
+    return foundMarker;
+}
+
+function setupSearch() {
+    const searchInput = document.querySelector('.search-input');
+    searchInput.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.result-item').forEach(item => {
+            const name = item.querySelector('.result-name').textContent.toLowerCase();
+            const address = item.querySelector('.result-address').textContent.toLowerCase();
+            item.style.display = (name.includes(term) || address.includes(term)) ? 'flex' : 'none';
+        });
+    });
+}
+
+// Templates
 function createCustomIcon(iconName) {
     return L.icon({
         iconUrl: `${imagePaths.markers}${iconName}.png`,
@@ -67,17 +123,15 @@ function createPopupContent(landmark) {
                 <h3>${landmark.fullName}</h3>
                 <p class="address">${landmark.address}</p>
             </div>
-            
             <img src="${imagePath}" alt="${landmark.name}" class="popup-image">
-            
             <div class="popup-description">
                 <p>${landmark.description}</p>
             </div>
-            
             <div class="popup-details">
                 <h4>Informações</h4>
                 <ul>
-                    ${landmark.details.currentExhibition ? `<li><strong>Exposição atual:</strong> ${landmark.details.currentExhibition}</li>` : ''}
+                    ${landmark.details.currentExhibition ? 
+                      `<li><strong>Exposição atual:</strong> ${landmark.details.currentExhibition}</li>` : ''}
                     <li><strong>Endereço:</strong> ${landmark.address}</li>
                     <li><strong>Inauguração:</strong> ${landmark.details.founded}</li>
                     <li><strong>Arquiteto(a):</strong> ${landmark.details.architect}</li>
@@ -89,7 +143,6 @@ function createPopupContent(landmark) {
                     <li><strong>Tipo:</strong> ${landmark.details.type}</li>
                 </ul>
             </div>
-            
             <div class="popup-actions">
                 <a href="https://www.google.com/maps/dir/?api=1&destination=${landmark.coords[0]},${landmark.coords[1]}" 
                    target="_blank" class="action-btn">
@@ -100,73 +153,5 @@ function createPopupContent(landmark) {
     `;
 }
 
-// Função para criar itens da barra lateral
-function createSidebarItems() {
-    const resultsContainer = document.querySelector('.search-results');
-    resultsContainer.innerHTML = '';
-    landmarks.sort((a, b) => a.name.localeCompare(b.name));
-
-    landmarks.forEach(landmark => {
-        const iconUrl = `${imagePaths.markers}${landmark.icon}.png`;
-        
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.innerHTML = `
-            <div class="result-marker">
-                <img src="${iconUrl}" alt="${landmark.name}" class="sidebar-icon">
-            </div>
-            <div class="result-content">
-                <div class="result-name">${landmark.name}</div>
-                <div class="result-address">${landmark.address}</div>
-            </div>
-        `;
-
-        // Adiciona evento de clique
-        item.addEventListener('click', () => {
-            map.setView(landmark.coords, 16);
-            const marker = findMarkerByCoords(landmark.coords);
-            if (marker) marker.openPopup();
-        });
-        
-        resultsContainer.appendChild(item);
-    });
-}
-
-// Função auxiliar para encontrar marcador pelas coordenadas
-function findMarkerByCoords(coords) {
-    let foundMarker = null;
-    map.eachLayer(layer => {
-        if (layer instanceof L.Marker) {
-            const markerCoords = layer.getLatLng();
-            if (markerCoords.lat === coords[0] && markerCoords.lng === coords[1]) {
-                foundMarker = layer;
-            }
-        }
-    });
-    return foundMarker;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    createSidebarItems();
-    
-    // Implementação da busca
-    const searchInput = document.querySelector('.search-input');
-    searchInput.addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        const items = document.querySelectorAll('.result-item');
-        
-        items.forEach(item => {
-            const name = item.querySelector('.result-name').textContent.toLowerCase();
-            const address = item.querySelector('.result-address').textContent.toLowerCase();
-            if (name.includes(term) || address.includes(term)) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    });
-});
-
-// Inicializa o mapa quando o DOM estiver carregado
-document.addEventListener('DOMContentLoaded', initMap);
+// Inicialização única
+document.addEventListener('DOMContentLoaded', initializeApp);
