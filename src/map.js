@@ -6,28 +6,44 @@ const imagePaths = {
     landmarks: 'imgs/landmarks/'
 };
 
+// Variável global para armazenar a instância do mapa
+let mapInstance = null;
+
 // Inicialização do mapa
 function initMap() {
+    const container = document.getElementById('map');
+    
+    // Verifica se o mapa já existe e remove antes de criar um novo
+    if (mapInstance) {
+        mapInstance.remove();
+    }
+    
+    // Limpa qualquer conteúdo pré-existente no container
+    container.innerHTML = '';
+    
+    // Cria nova instância do mapa
     const saoPauloCoords = [-23.5505, -46.6333];
-    const map = L.map('map').setView(saoPauloCoords, 12);
+    mapInstance = L.map('map').setView(saoPauloCoords, 12);
 
     // Camada base do mapa
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18,
-    }).addTo(map);
+    }).addTo(mapInstance);
 
     // Adiciona marcadores ao mapa
     landmarks.forEach(landmark => {
         const marker = L.marker(landmark.coords, {
             icon: createCustomIcon(landmark.icon)
-        }).addTo(map);
-        
+        }).addTo(mapInstance);
+
         marker.bindPopup(createPopupContent(landmark));
         marker.on('click', function() {
-            map.setView(this.getLatLng(), 15);
+            mapInstance.setView(this.getLatLng(), 15);
         });
     });
+    
+    return mapInstance;
 }
 
 // Cria ícones personalizados
