@@ -24,7 +24,7 @@ function initMap() {
         container.innerHTML = '';
     }
 
-    mapInstance = L.map('map').setView([-23.5505, -46.6333], 12);
+    mapInstance = L.map('map').setView([-23.5715, -46.6333], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -39,6 +39,7 @@ function initMap() {
             const landmarkId = langBtn.dataset.id;
             const landmark = landmarks.find(l => l.id === landmarkId);
             if (landmark) {
+                // Determinar idioma atual baseado no texto do botão
                 const currentLang = langBtn.textContent.trim() === 'PT' ? 'en' : 'pt';
                 attachPopupEventListeners(e.popup, landmark, currentLang);
             }
@@ -119,43 +120,63 @@ function handleLanguageSwitch(popup, landmark, currentLang) {
     const newLang = currentLang === 'en' ? 'pt' : 'en';
     const newContent = createPopupContent(landmark, newLang);
 
-    // Fecha o popup atual
-    popup.remove();
-
-    // Encontra o marker correspondente e reabre o popup com novo conteúdo
+    // Encontra o marker correspondente
     const marker = findMarkerByCoords(landmark.coords);
 
     if (marker) {
+        // Remove o popup atual e seus event listeners
+        popup.remove();
+        
+        // Vincula o novo popup com o conteúdo atualizado
         marker.unbindPopup();
-        marker.bindPopup(newContent).openPopup();
-
-        // Aguarda o DOM ser renderizado e reanexa eventos
+        marker.bindPopup(newContent);
+        
+        // Abre o novo popup
+        marker.openPopup();
+        
+        // Aguarda o DOM ser renderizado e reanexa eventos com o idioma correto
         setTimeout(() => {
             const newPopup = marker.getPopup();
-            attachPopupEventListeners(newPopup, landmark, newLang);
-        }, 0);
+            if (newPopup) {
+                attachPopupEventListeners(newPopup, landmark, newLang);
+            }
+        }, 50); // Aumentei um pouco o timeout para garantir renderização
     }
 }
 
 function attachPopupEventListeners(popup, landmark, lang) {
     const popupContainer = popup.getElement();
+    if (!popupContainer) return;
+    
     const langBtn = popupContainer.querySelector('.btn-lang');
     const contrastBtn = popupContainer.querySelector('.btn-contrast');
 
+    // Remove event listeners existentes para evitar duplicatas
     if (langBtn) {
-        langBtn.addEventListener('click', () => {
+        langBtn.replaceWith(langBtn.cloneNode(true));
+        const newLangBtn = popupContainer.querySelector('.btn-lang');
+        
+        newLangBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             handleLanguageSwitch(popup, landmark, lang);
         });
     }
 
     if (contrastBtn) {
-        contrastBtn.addEventListener('click', () => {
+        contrastBtn.replaceWith(contrastBtn.cloneNode(true));
+        const newContrastBtn = popupContainer.querySelector('.btn-contrast');
+        
+        newContrastBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const contentDiv = popupContainer.querySelector('.popup-content');
             if (contentDiv) {
                 contentDiv.classList.toggle('high-contrast');
-            } 
+                console.log('Contraste alternado para idioma:', lang); // Debug
+            }
         });
-    } 
+    }
 }
 
 // Templates
@@ -187,8 +208,8 @@ function createPopupContent(landmark, lang = 'pt') {
             <div class="popup-details">
                 <h4>${lang === 'en' ? 'Information' : 'Informações'}</h4>
                 <ul>
-                    ${data.details.currentExhibition ?
-            `<li><strong>${lang === 'en' ? 'Current exhibition' : 'Exposição atual'}:</strong> ${data.details.currentExhibition}</li>` : ''}
+                    ${data.details.currentExhibition ? 
+                        `<li><strong>${lang === 'en' ? 'Current exhibition' : 'Exposição atual'}:</strong> ${data.details.currentExhibition}</li>` : ''}
                     <li><strong>${lang === 'en' ? 'Address' : 'Endereço'}:</strong> ${data.address}</li>
                     <li><strong>${lang === 'en' ? 'Founded' : 'Inauguração'}:</strong> ${data.details.founded}</li>
                     <li><strong>${lang === 'en' ? 'Architect' : 'Arquiteto(a)'}:</strong> ${data.details.architect}</li>
