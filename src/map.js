@@ -18,7 +18,7 @@ function initializeApp() {
 // Mapa
 function initMap() {
     const container = document.getElementById('map');
-    
+
     if (mapInstance) {
         mapInstance.remove();
         container.innerHTML = '';
@@ -31,6 +31,20 @@ function initMap() {
         maxZoom: 18,
     }).addTo(mapInstance);
 
+    mapInstance.on('popupopen', (e) => {
+        const popupContainer = e.popup.getElement();
+        const langBtn = popupContainer.querySelector('.btn-lang');
+
+        if (langBtn) {
+            const landmarkId = langBtn.dataset.id;
+            const landmark = landmarks.find(l => l.id === landmarkId);
+            if (landmark) {
+                const currentLang = langBtn.textContent.trim() === 'PT' ? 'en' : 'pt';
+                attachPopupEventListeners(e.popup, landmark, currentLang);
+            }
+        }
+    });
+
     addMarkersToMap();
     return mapInstance;
 }
@@ -42,7 +56,7 @@ function addMarkersToMap() {
         }).addTo(mapInstance);
 
         marker.bindPopup(createPopupContent(landmark));
-        marker.on('click', function() {
+        marker.on('click', function () {
             mapInstance.setView(this.getLatLng(), 15);
         });
     });
@@ -52,7 +66,7 @@ function addMarkersToMap() {
 function createSidebarItems() {
     const resultsContainer = document.querySelector('.search-results');
     resultsContainer.innerHTML = '';
-    
+
     landmarks.sort((a, b) => a.name.localeCompare(b.name))
         .forEach(landmark => {
             const item = document.createElement('div');
@@ -72,7 +86,6 @@ function createSidebarItems() {
                 mapInstance.setView(landmark.coords, 16);
                 findMarkerByCoords(landmark.coords)?.openPopup();
             });
-            
             resultsContainer.appendChild(item);
         });
 }
@@ -81,8 +94,8 @@ function createSidebarItems() {
 function findMarkerByCoords(coords) {
     let foundMarker = null;
     mapInstance.eachLayer(layer => {
-        if (layer instanceof L.Marker && 
-            layer.getLatLng().lat === coords[0] && 
+        if (layer instanceof L.Marker &&
+            layer.getLatLng().lat === coords[0] &&
             layer.getLatLng().lng === coords[1]) {
             foundMarker = layer;
         }
@@ -102,6 +115,49 @@ function setupSearch() {
     });
 }
 
+function handleLanguageSwitch(popup, landmark, currentLang) {
+    const newLang = currentLang === 'en' ? 'pt' : 'en';
+    const newContent = createPopupContent(landmark, newLang);
+
+    // Fecha o popup atual
+    popup.remove();
+
+    // Encontra o marker correspondente e reabre o popup com novo conteúdo
+    const marker = findMarkerByCoords(landmark.coords);
+
+    if (marker) {
+        marker.unbindPopup();
+        marker.bindPopup(newContent).openPopup();
+
+        // Aguarda o DOM ser renderizado e reanexa eventos
+        setTimeout(() => {
+            const newPopup = marker.getPopup();
+            attachPopupEventListeners(newPopup, landmark, newLang);
+        }, 0);
+    }
+}
+
+function attachPopupEventListeners(popup, landmark, lang) {
+    const popupContainer = popup.getElement();
+    const langBtn = popupContainer.querySelector('.btn-lang');
+    const contrastBtn = popupContainer.querySelector('.btn-contrast');
+
+    if (langBtn) {
+        langBtn.addEventListener('click', () => {
+            handleLanguageSwitch(popup, landmark, lang);
+        });
+    }
+
+    if (contrastBtn) {
+        contrastBtn.addEventListener('click', () => {
+            const contentDiv = popupContainer.querySelector('.popup-content');
+            if (contentDiv) {
+                contentDiv.classList.toggle('high-contrast');
+            } 
+        });
+    } 
+}
+
 // Templates
 function createCustomIcon(iconName) {
     return L.icon({
@@ -113,41 +169,48 @@ function createCustomIcon(iconName) {
     });
 }
 
-function createPopupContent(landmark) {
+function createPopupContent(landmark, lang = 'pt') {
     const imagePath = `${imagePaths.landmarks}${landmark.image}`;
-    
+    const data = (lang === 'en' && landmark.translations?.en) ? landmark.translations.en : landmark;
+
     return `
         <div class="popup-content">
             <div class="popup-header">
-                <h2>${landmark.name}</h2>
-                <h3>${landmark.fullName}</h3>
-                <p class="address">${landmark.address}</p>
+                <h2>${data.name}</h2>
+                <h3>${data.fullName}</h3>
+                <p class="address">${data.address}</p>
             </div>
-            <img src="${imagePath}" alt="${landmark.name}" class="popup-image">
+            <img src="${imagePath}" alt="${data.name}" class="popup-image">
             <div class="popup-description">
-                <p>${landmark.description}</p>
+                <p>${data.description}</p>
             </div>
             <div class="popup-details">
-                <h4>Informações</h4>
+                <h4>${lang === 'en' ? 'Information' : 'Informações'}</h4>
                 <ul>
-                    ${landmark.details.currentExhibition ? 
-                      `<li><strong>Exposição atual:</strong> ${landmark.details.currentExhibition}</li>` : ''}
-                    <li><strong>Endereço:</strong> ${landmark.address}</li>
-                    <li><strong>Inauguração:</strong> ${landmark.details.founded}</li>
-                    <li><strong>Arquiteto(a):</strong> ${landmark.details.architect}</li>
-                    <li><strong>Visitantes:</strong> ${landmark.details.visitors}</li>
-                    <li><strong>Diretor(a):</strong> ${landmark.details.director}</li>
-                    <li><strong>Curador(a):</strong> ${landmark.details.curator}</li>
-                    <li><strong>Telefone:</strong> ${landmark.details.phone}</li>
-                    <li><strong>Horário:</strong> ${landmark.details.hours}</li>
-                    <li><strong>Tipo:</strong> ${landmark.details.type}</li>
+                    ${data.details.currentExhibition ?
+            `<li><strong>${lang === 'en' ? 'Current exhibition' : 'Exposição atual'}:</strong> ${data.details.currentExhibition}</li>` : ''}
+                    <li><strong>${lang === 'en' ? 'Address' : 'Endereço'}:</strong> ${data.address}</li>
+                    <li><strong>${lang === 'en' ? 'Founded' : 'Inauguração'}:</strong> ${data.details.founded}</li>
+                    <li><strong>${lang === 'en' ? 'Architect' : 'Arquiteto(a)'}:</strong> ${data.details.architect}</li>
+                    <li><strong>${lang === 'en' ? 'Visitors' : 'Visitantes'}:</strong> ${data.details.visitors}</li>
+                    <li><strong>${lang === 'en' ? 'Director' : 'Diretor(a)'}:</strong> ${data.details.director}</li>
+                    <li><strong>${lang === 'en' ? 'Curator' : 'Curador(a)'}:</strong> ${data.details.curator}</li>
+                    <li><strong>${lang === 'en' ? 'Phone' : 'Telefone'}:</strong> ${data.details.phone}</li>
+                    <li><strong>${lang === 'en' ? 'Hours' : 'Horário'}:</strong> ${data.details.hours}</li>
+                    <li><strong>${lang === 'en' ? 'Type' : 'Tipo'}:</strong> ${data.details.type}</li>
                 </ul>
             </div>
             <div class="popup-actions">
                 <a href="https://www.google.com/maps/dir/?api=1&destination=${landmark.coords[0]},${landmark.coords[1]}" 
                    target="_blank" class="action-btn">
-                    <i class="fa fa-route"></i> Rotas
+                    <i class="fa fa-route"></i> ${lang === 'en' ? 'Directions' : 'Rotas'}
                 </a>
+                <button class="action-btn btn-lang" data-id="${landmark.id}">
+                    <i class="fa fa-language"></i> ${lang === 'en' ? 'PT' : 'EN'}
+                </button>
+                <button class="action-btn btn-contrast">
+                    <i class="fa fa-adjust"></i>
+                </button>
             </div>
         </div>
     `;

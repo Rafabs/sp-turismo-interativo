@@ -167,5 +167,24 @@
     justify-content: center;
 }
 
+.popup-content.high-contrast {
+    background-color: #000 !important;
+    color: #ff0 !important;
+}
+
+.popup-content.high-contrast h2,
+.popup-content.high-contrast h3,
+.popup-content.high-contrast h4,
+.popup-content.high-contrast p,
+.popup-content.high-contrast li,
+.popup-content.high-contrast a {
+    color: #ff0 !important;
+}
+
+.popup-content.high-contrast img {
+    filter: grayscale(100%) contrast(200%);
+    border: 2px solid #ff0;
+}
+
 /* Ícones do Font Awesome (certifique-se de ter incluído no HTML) */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
