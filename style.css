@@ -4,7 +4,7 @@ body {
     padding: 0;
     background-color: #CACACA; 
     position: relative;
-    overflow: hidden; /* Remove scrollbar global */    
+    overflow: hidden; 
 }
 
 .navbar {
@@ -92,20 +92,20 @@ body {
 
 .map-container {
     display: flex;
-    gap: 2px; /* Espaço entre os elementos */
+    gap: 2px; 
     width: 100%;
-    height: 82vh; /* Ajuste conforme necessário */
+    height: 84vh; 
 }
 
 .map {
-    flex: 8; /* 80% do container */
+    flex: 8; 
     height: 100%;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .search-sidebar {
-    flex: 2; /* 20% do container */
+    flex: 2; 
     background: #9A9A9A;
     padding: 5px;
     border-radius: 10px;
