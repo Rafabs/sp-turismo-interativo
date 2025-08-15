@@ -1,5 +1,5 @@
 function getWeather() {
-    var apiKey = 'fcf1fc32c090cb6b4f891dbcb7b1baf2'; 
+    var apiKey = '46ad9bcd907578b771c54270a3560cb3'; 
     var url = "https://api.openweathermap.org/data/2.5/weather?q=Sao%20Paulo&appid=" + apiKey + "&units=metric";
 
     fetch(url)
